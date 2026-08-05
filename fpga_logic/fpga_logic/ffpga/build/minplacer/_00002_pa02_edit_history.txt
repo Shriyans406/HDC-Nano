@@ -1,0 +1,1 @@
+NLEDIT=minplacer\00002_pa02_00004_repopt\minplacer_nledit.txt

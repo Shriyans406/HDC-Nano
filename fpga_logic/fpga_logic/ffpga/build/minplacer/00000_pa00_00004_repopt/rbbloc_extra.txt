@@ -1,0 +1,5 @@
+RBB 73: chip_tile_x=0, chip_tile_y=0, chip_x=7, chip_y=22
+RBB 74: chip_tile_x=0, chip_tile_y=0, chip_x=10, chip_y=20
+RBB 75: chip_tile_x=0, chip_tile_y=0, chip_x=13, chip_y=28
+RBB 76: chip_tile_x=0, chip_tile_y=0, chip_x=16, chip_y=10
+RBB 77: chip_tile_x=0, chip_tile_y=0, chip_x=16, chip_y=18

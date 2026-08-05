@@ -1,0 +1,26 @@
+PrePlaceDly=102184
+#PLC_RUNDIR=minplacer\00001_pa01_00003_wl timing=12873 cg=0
+PlaceDly=12873
+TWL=25260
+PEAKMEM=1305MB
+#PLC_RUNDIR=minplacer\00001_pa01_00004_repopt timing=12873 cg=0
+PlaceDly=12873
+TWL=26190
+PEAKMEM=1338MB
+#NLEDIT=minplacer\00001_pa01_00004_repopt\minplacer_nledit.txt
+REP=1
+#PLC_RUNDIR=minplacer\00001_pa01_00007_repwl timing=12897 cg=0
+PlaceDly=12897
+TWL=27360
+PEAKMEM=1338MB
+#PLC_RUNDIR=minplacer\00001_pa01_00008_post timing=21013 cg=0
+PostIter=29
+PlaceDly=21013
+TWL=33350
+PEAKMEM=1415MB
+TotPostIter=29
+#PLC_RUNDIR=minplacer\00001_pa01_00009_rplan timing=21013 cg=50
+FinderPnRatio=50
+FinderPnIter=0
+PlaceDly=21013
+PEAKMEM=1374MB

@@ -1,0 +1,44 @@
+
+
+####   Resource Utilization Report   ####
+
+    Top level module name: hdc_core
+
+    Resource usage:
+      66 Logic 6-LUT CLBs
+          192 CLB LUTs utilized (up to 4 per CLB)
+                51 of which are 6-input LUTs
+                79 of which are dual 5-input LUTs
+               271 LUTs total
+           99 CLB FFs utilized (up to 4 pairs per CLB)
+                99 of which are LUT-FF combination
+                63 of which are dual-FFs
+                63 of which are dual-LUT-dual-FF combination
+               162 FFs total
+       7 I/O CLBs
+            8  Input pins
+            2  Input FFs utilized
+            6 Output pins
+            3 Output FFs utilized
+       1 Clock
+           Clock 0: net   304, $auto$clkbufmap.cc:294:execute$13574, Fanout: 50 CLBs
+           Total 1 unique clocks
+    need 0 DSP and 1 Logic-Memory FPGA 1K Tiles.
+
+ 
+####   Resource Utilization Complete   ####
+
+TILE-REQ:		0		0		0		1
+
+### Total FPGA resources from current floorplan: ###
+                       184 IOBs
+                       140 Logic 6-LUT CLBs
+                              40 CLBs support RAM/SR
+
+Usage of Logic CLBs is 47.1%.
+    Logic-Memory CLB for RAM/Shift-Register is 0.0%.
+Usage of LUTs is 34.3%.
+    dual-LUTs is 14.1%.
+Usage of FF is 17.7%.
+    dual-FF is 11.2%.
+Usage of IO CLB is 3.8%.

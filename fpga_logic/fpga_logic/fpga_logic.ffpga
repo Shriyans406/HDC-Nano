@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GPDProject version="40" oldestCompatibleVersion="32" GPDVersion="6.52.001" lastChange="5 Aug 2026 08:57:49" projectChecksumState="1" projectChecksum="f3b38350">
+<GPDProject version="40" oldestCompatibleVersion="32" GPDVersion="6.52.001" lastChange="5 Aug 2026 09:29:11" projectChecksumState="1" projectChecksum="e340fbdd">
     <generalProjectSettings/>
     <chip family="04" type="06" friendlyName="FFPGA" partNumber="67" package="26">
         <nvmData registerLenght="480">0 0 0 28 0 0 0 0 A5 A5 A5 A5 0 0 0 0 0 0 0 0 5A 5A 5A 5A 0 0 0 0 22 22 22 22 22 22 22 22 22 22 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</nvmData>
@@ -652,8 +652,10 @@
             </synthesize>
         </settings>
         <openedTabs>
-            <openedTab>main.v</openedTab>
+            <openedTab>popcount_8bit.v</openedTab>
             <openedTab>I/O Planner</openedTab>
+            <openedTab>hdc_core.v</openedTab>
+            <openedTab>tb_hdc_core.v</openedTab>
         </openedTabs>
         <pipelineStagesStates>
             <pipelineStageState>
@@ -667,10 +669,13 @@
         </pipelineStagesStates>
         <modules>
             <scr>
-                <module filename="main.v"/>
+                <module filename="popcount_8bit.v"/>
+                <module filename="hdc_core.v"/>
             </scr>
             <lib/>
-            <sim/>
+            <sim>
+                <module filename="tb_hdc_core.v"/>
+            </sim>
             <netlists/>
             <timing-constraints/>
             <full-chip-simulation-models/>
@@ -873,10 +878,10 @@
     </fpga-data>
     <projectData>
         <specs>
-            <lastModify/>
-            <vddSpecs/>
-            <vdd2Specs/>
-            <tempSpecs/>
+            <lastModify lastModifyValue="05.08.2026 3:38:59"/>
+            <vddSpecs vddMin="1.05" vddTyp="1.1" vddMax="1.15"/>
+            <vdd2Specs vdd2Min="1.71" vdd2Typ="3.3" vdd2Max="3.465"/>
+            <tempSpecs tempMin="-40" tempTyp="25" tempMax="85"/>
         </specs>
         <projectDataFields>
             <textLineDataField name="Customer Name" id="2" text=""/>

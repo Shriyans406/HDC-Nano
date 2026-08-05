@@ -1,0 +1,15 @@
+PrePlaceDly=102184
+#PLC_RUNDIR=minplacer\00003_pa03_00003_wl timing=13085 cg=0
+PlaceDly=13085
+TWL=25600
+PEAKMEM=1305MB
+#PLC_RUNDIR=minplacer\00003_pa03_00004_repopt timing=13085 cg=0
+PlaceDly=13085
+TWL=26590
+PEAKMEM=1338MB
+#NLEDIT=minplacer\00003_pa03_00004_repopt\minplacer_nledit.txt
+REP=1
+#PLC_RUNDIR=minplacer\00003_pa03_00007_repwl timing=13085 cg=0
+PlaceDly=13085
+TWL=26840
+PEAKMEM=1338MB

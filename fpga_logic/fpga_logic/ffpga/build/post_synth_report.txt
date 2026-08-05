@@ -1,0 +1,24 @@
+
+6. Printing statistics.
+
+=== hdc_core ===
+
+   Number of wires:                391
+   Number of wire bits:            789
+   Number of public wires:          11
+   Number of public wire bits:      45
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                418
+     BUFG                            1
+     CARRY4                          8
+     FDCE                          156
+     FDPE                            9
+     INV                             3
+     LUT2                           16
+     LUT3                          140
+     LUT4                           11
+     LUT5                           23
+     LUT6                           51
+
