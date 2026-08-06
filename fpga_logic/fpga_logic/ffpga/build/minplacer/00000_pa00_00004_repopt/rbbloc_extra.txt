@@ -1,5 +1,6 @@
-RBB 73: chip_tile_x=0, chip_tile_y=0, chip_x=7, chip_y=22
-RBB 74: chip_tile_x=0, chip_tile_y=0, chip_x=10, chip_y=20
-RBB 75: chip_tile_x=0, chip_tile_y=0, chip_x=13, chip_y=28
-RBB 76: chip_tile_x=0, chip_tile_y=0, chip_x=16, chip_y=10
-RBB 77: chip_tile_x=0, chip_tile_y=0, chip_x=16, chip_y=18
+RBB 81: chip_tile_x=0, chip_tile_y=0, chip_x=4, chip_y=12
+RBB 82: chip_tile_x=0, chip_tile_y=0, chip_x=7, chip_y=22
+RBB 83: chip_tile_x=0, chip_tile_y=0, chip_x=7, chip_y=26
+RBB 84: chip_tile_x=0, chip_tile_y=0, chip_x=13, chip_y=12
+RBB 85: chip_tile_x=0, chip_tile_y=0, chip_x=13, chip_y=16
+RBB 86: chip_tile_x=0, chip_tile_y=0, chip_x=16, chip_y=18

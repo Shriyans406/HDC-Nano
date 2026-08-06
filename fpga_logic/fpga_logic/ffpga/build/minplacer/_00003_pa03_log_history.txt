@@ -7,3 +7,4 @@ LOG=minplacer\00003_pa03_00005_committing_nledit\minplacer_00003_pa03_00005.log
 LOG=minplacer\00003_pa03_00006_committed_nledit\minplacer_00003_pa03_00006.log
 LOG=minplacer\00003_pa03_00007_repwl\minplacer_00003_pa03_00007.log
 LOG=minplacer\00003_pa03_00008_post\minplacer_00003_pa03_00008.log
+LOG=minplacer\00003_pa03_00009_rplan\minplacer_00003_pa03_00009.log

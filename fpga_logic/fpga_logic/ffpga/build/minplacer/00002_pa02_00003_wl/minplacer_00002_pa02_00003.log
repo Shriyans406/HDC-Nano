@@ -1,15 +1,15 @@
-LOG STARTS The current time is Wed Aug  5 09:30:11 2026
+LOG STARTS The current time is Thu Aug  6 15:15:24 2026
 TA took 0 seconds.
-LOG ENDS The current time is Wed Aug  5 09:30:11 2026
+LOG ENDS The current time is Thu Aug  6 15:15:30 2026
 
 
 
-The current time is Wed Aug  5 09:30:11 2026
+The current time is Thu Aug  6 15:15:30 2026
 CPUs=4
 EXE="C:\Program Files\Renesas Electronics\Go Configure Software Hub\external\eda-placer\v23\eda-placer.exe"
 BuildDir=C:\Program Files\Renesas Electronics\Go Configure Software Hub\external\eda-placer\v23
 BuildPath="C:\Program Files\Renesas Electronics\Go Configure Software Hub\external\eda-placer\v23"
-CWD=C:\Users\HP\AppData\Local\Temp\iwAFROTg\out\minplacer\00002_pa02_00003_wl
+CWD=C:\Users\HP\AppData\Local\Temp\pizEFRcY\out\minplacer\00002_pa02_00003_wl
 LogFile=minplacer_00002_pa02_00003.log
 PrintScreen=..\_00002_pa02_stdout.txt
 Command line: C:\Program Files\Renesas Electronics\Go Configure Software Hub\external\eda-placer\v23\eda-placer.exe -print_screen ..\_00002_pa02_stdout.txt -eflx_call_minplacer 00002_pa02_00003_wl__out__hdc_core
@@ -139,22 +139,22 @@ GeometryDumpLayers starts.
 GeometryDumpLayers ends.
 pProblemIni. eramclkAsClock=1
 pProblemIniNetlist. skip_hifi=1, skip_pppff=2147483647
-Netlist=NETLIST_hdc_core NumInst=75 NumNet=271
-NumPinst=69
+Netlist=NETLIST_hdc_core NumInst=83 NumNet=272
+NumPinst=77
 	DontPlace=0, NonRootRbbChainMember=4, NonRootDspChainMember=0, Const=1, ClkBuf=1
-There are 75 instances. After combining instances in chains, there are 69 instances to place.
+There are 83 instances. After combining instances in chains, there are 77 instances to place.
 	Clock[0] OrigClock[0] net (net_index=304) $auto$clkbufmap.cc:294:execute$13574
 NumPnet=263
-NumTrivial=0 NumDriverless=0
-AverageFO=3.13 #HifiNet=2 AverageFO_HifiNet=61.69
+NumTrivial=1 NumDriverless=0
+AverageFO=3.14 #HifiNet=2 AverageFO_HifiNet=62.69
 NumClk=1 (with 0 inverted)
-There are 263 nets in the design, 2 of which have fanout larger than 49. Average fanout is 3.13.
+There are 263 nets in the design, 2 of which have fanout larger than 49. Average fanout is 3.14.
 There is 1 clock in the design.
-NumInsts=69
+NumInsts=77
 Resource usages:
  Type=L: Capacity=140 Utilized=66 NumInst=62. [ChainLen=1]=58 [ChainLen=2]=4
  Type=M: Capacity=40 Utilized=0 NumInst=0.
- Type=IOB: Capacity=184 Utilized=7 NumInst=7.
+ Type=IOB: Capacity=184 Utilized=15 NumInst=15.
 Clamp util_limit to util_limit_1t 0.950
 INFLATE STARTS WITH REALPIN=1 L-CAP=140 USAGE=66 INFLATE_RATE=0.950 USAGE_LIMIT=133 CONN_LIMIT=25 SKIP_LOWUTIL=1
 INFLATE 25 L-INSTS collected. The first inflated inst has 29 conns
@@ -165,56 +165,32 @@ pDelayLibIni. pdelay_estimate_pppff_delay=120
 TileRange read: File is not given. Use whole chip.
 Reading timing_def file ..\..\minplacer\00002_pa02_00002_setup\minplacer.timing_def
 pPipeAlloc: OptMode=1 PppFfInsertDone=0 MinPipeRtDly=98 #Chain=0 AveChainLen=0.0 MaxChainLen=0 #Net=0 AveChainFan=0.0 MaxChainFan=0 #MixedZeroFan=0 Opt_UseLatency=0 OptLine_RightSlack_WorseThreshold=100
-(0): Ini TileRange={0,1; 0,1}. IsTiny=0 IsLowUtil=0. CurMem=234446848 PeakMem=369483776
+(0): Ini TileRange={0,1; 0,1}. IsTiny=0 IsLowUtil=0. CurMem=234848256 PeakMem=369881088
 ALWAYS_CLKPLC=0
 RandomPlacement ends.
 FORCE(1): Initial random illegal placement generated.
-FORCE(1): Initial random placement. TWL_WLSYS=64400 (29140,35260)
-PANN_TILERANGE LayerMask=38 TileRange={0,1; 0,1} RangeDivider=4 WL=12020 (5711, 6309) StartingIter=0 NumIters=1
+FORCE(1): Initial random placement. TWL_WLSYS=64120 (28480,35640)
+PANN_TILERANGE LayerMask=38 TileRange={0,1; 0,1} RangeDivider=4 WL=12914 (5622, 7292) StartingIter=0 NumIters=1
 PANN_TILERANGE ENDS TIMESPENT=0
-PANN_TILERANGE LayerMask=40 TileRange={0,1; 0,1} RangeDivider=3 WL=12352 (5836, 6516) StartingIter=0 NumIters=1
-Improving the placement of 7 instances for resource type(s) of IOB: ...............................................................................................................
-PANN_TILERANGE  (iter=0) WL=9820 (4751, 5069) TIMESPENT=0
+PANN_TILERANGE LayerMask=4 TileRange={0,1; 0,1} RangeDivider=4 WL=4687 (1626, 3061) StartingIter=0 NumIters=1
 PANN_TILERANGE ENDS TIMESPENT=0
-PANN_TILERANGE LayerMask=40 TileRange={0,1; 0,1} RangeDivider=5 WL=7483 (3788, 3695) StartingIter=0 NumIters=1
-Improving the placement of 7 instances for resource type(s) of IOB: ...............................................................................................................
-PANN_TILERANGE  (iter=0) WL=2774 (1088, 1686) TIMESPENT=0
+PANN_TILERANGE LayerMask=2 TileRange={0,1; 0,1} RangeDivider=4 WL=5747 (1844, 3903) StartingIter=0 NumIters=1
 PANN_TILERANGE ENDS TIMESPENT=0
-PANN_TILERANGE LayerMask=4 TileRange={0,1; 0,1} RangeDivider=4 WL=7028 (2871, 4157) StartingIter=0 NumIters=1
-PANN_TILERANGE ENDS TIMESPENT=0
-PANN_TILERANGE LayerMask=40 TileRange={0,1; 0,1} RangeDivider=3 WL=7028 (2871, 4157) StartingIter=0 NumIters=1
-Improving the placement of 7 instances for resource type(s) of IOB: ...............................................................................................................
-PANN_TILERANGE  (iter=0) WL=2564 (1080, 1484) TIMESPENT=0
-PANN_TILERANGE ENDS TIMESPENT=0
-PANN_TILERANGE LayerMask=40 TileRange={0,1; 0,1} RangeDivider=5 WL=7316 (3724, 3592) StartingIter=0 NumIters=1
-Improving the placement of 7 instances for resource type(s) of IOB: ...............................................................................................................
-PANN_TILERANGE  (iter=0) WL=2413 (871, 1542) TIMESPENT=1
-PANN_TILERANGE ENDS TIMESPENT=1
-PANN_TILERANGE LayerMask=2 TileRange={0,1; 0,1} RangeDivider=4 WL=7045 (2835, 4210) StartingIter=0 NumIters=1
-PANN_TILERANGE ENDS TIMESPENT=0
-PANN_TILERANGE LayerMask=40 TileRange={0,1; 0,1} RangeDivider=3 WL=7045 (2835, 4210) StartingIter=0 NumIters=1
-Improving the placement of 7 instances for resource type(s) of IOB: ...............................................................................................................
-PANN_TILERANGE  (iter=0) WL=2741 (1170, 1571) TIMESPENT=0
-PANN_TILERANGE ENDS TIMESPENT=0
-PANN_TILERANGE LayerMask=40 TileRange={0,1; 0,1} RangeDivider=5 WL=7504 (3874, 3630) StartingIter=0 NumIters=1
-Improving the placement of 7 instances for resource type(s) of IOB: ...............................................................................................................
-PANN_TILERANGE  (iter=0) WL=2417 (890, 1527) TIMESPENT=0
-PANN_TILERANGE ENDS TIMESPENT=0
-PANN_TILERANGE LayerMask=1 TileRange={0,1; 0,1} RangeDivider=4 WL=60560 (27210, 33350) StartingIter=0 NumIters=1
+PANN_TILERANGE LayerMask=1 TileRange={0,1; 0,1} RangeDivider=4 WL=59440 (29480, 29960) StartingIter=0 NumIters=1
 PANN_TILERANGE Add LAYER_M to the layermask.
-Improving the placement of 62 instances for resource type(s) of RBB-L RBB-M: ...........................................................................................................
-PANN_TILERANGE  (iter=0) WL=25630 (13480, 12150) TIMESPENT=15
-PANN_TILERANGE ENDS TIMESPENT=15
-CROSS-TILE STAT: [0]=824
+Improving the placement of 62 instances for resource type(s) of RBB-L RBB-M: ...............................................................................................................
+PANN_TILERANGE  (iter=0) WL=25830 (13160, 12670) TIMESPENT=17
+PANN_TILERANGE ENDS TIMESPENT=17
+CROSS-TILE STAT: [0]=825
 Wrote 62 RBB-locations out of 62 core insts and 4 chained insts to EFLX file ..\..\minplacer\00002_pa02_00003_wl\minplacer_rbbloc.txt.
-Wrote 7 RBB-locations out of 7 IOB insts to EFLX file ..\..\minplacer\00002_pa02_00003_wl\minplacer_rbbloc.txt.
-Wrote 0 RBB-locations out of 7 INTIOB insts to EFLX file ..\..\minplacer\00002_pa02_00003_wl\minplacer_rbbloc.txt.
-CLOCKPLAN_INI_NETLIST: NUM_CLOCKS=1 NUM_PINSTS=69
+Wrote 15 RBB-locations out of 15 IOB insts to EFLX file ..\..\minplacer\00002_pa02_00003_wl\minplacer_rbbloc.txt.
+Wrote 0 RBB-locations out of 15 INTIOB insts to EFLX file ..\..\minplacer\00002_pa02_00003_wl\minplacer_rbbloc.txt.
+CLOCKPLAN_INI_NETLIST: NUM_CLOCKS=1 NUM_PINSTS=77
 	 #Inst/Usage        L           M         DSP       SPRAM       UPRAM       2PRAM         IOB        ZIOB        NCLT        RCLT      
-	   CLOCK[ 0]*    47(   69)                                                                3(    3)                                    
-	   NON_CLOCK     15(   22)                                                                4(    4)                                    
+	   CLOCK[ 0]*    47(   69)                                                                                                            
+	   NON_CLOCK     15(   22)                                                                                                            
 CLOCKPLAN_INI_GEO: NUM_TILE_SLICES=1/1
-{Rsc/Util/MinThre={L=140/91/50 ,M=40/0/8 ,DSP=0/0/4 ,SPRAM=0/0/0 ,UPRAM=0/0/0 ,2PRAM=0/0/0 ,IOB=184/7/16 ,ZIOB=0/0/0 ,NCLT=0/0/0 ,RCLT=0/0/0}
+{Rsc/Util/MinThre={L=140/91/50 ,M=40/0/8 ,DSP=0/0/4 ,SPRAM=0/0/0 ,UPRAM=0/0/0 ,2PRAM=0/0/0 ,IOB=184/15/16 ,ZIOB=0/0/0 ,NCLT=0/0/0 ,RCLT=0/0/0}
 CLOCKPLAN_INI_PORTLOCKS
 	CLOCK[0]* port locks:
 BuildGaps
@@ -250,7 +226,7 @@ ClockPortFile ..\..\minplacer\00002_pa02_00003_wl\minplacer_clkloc.txt written.
 *********************************** TILE REPORT ***************************************
 |------------------------|
 |TILE_X0Y0               |
-|#INST=69                |
+|#INST=77                |
 |#CLK=1 #INVCLK=0        |
 |#ERAM_CP    0           |
 |#         0   0         |
@@ -258,27 +234,27 @@ ClockPortFile ..\..\minplacer\00002_pa02_00003_wl\minplacer_clkloc.txt written.
 |*                       |
 |eb0                     |
 |L=91,L58 C69            |
-|IOB=7 C3                |
+|IOB=15 C5               |
 |------------------------|
 CLUSTER[0] LAYER0=L TILE=[0,0] CLK=<0,-1> ERAMCLK=<91,0> REGION=<none>
- {L=91 C69 IOB=7 C3 LCHAIN=58 DCHAIN=0} #NEI=0 REACHABLES:
-CLOCK[0] #LockedPort=0 #AssignedPort=1 #OutputPort=0 TX0Y0={#Cluster=1 L=91 IOB=7}
+ {L=91 C69 IOB=15 C5 LCHAIN=58 DCHAIN=0} #NEI=0 REACHABLES:
+CLOCK[0] #LockedPort=0 #AssignedPort=1 #OutputPort=0 TX0Y0={#Cluster=1 L=91 IOB=15}
 *********************************** TILE REPORT ***************************************
 
 
 Placement timing:
                                Clock                                        Group  Achievable Frequency(MHz)
                       --------------                                  -----------  -------------------------
-$auto$clkbufmap.cc:294:execute$13574  <UDEF_$auto$clkbufmap.cc:294:execute$13574>                    76.970 
+$auto$clkbufmap.cc:294:execute$13574  <UDEF_$auto$clkbufmap.cc:294:execute$13574>                    76.283 
 
 
 pDelayLibFin
-(91): Fin. CurMem=31494144 PeakMem=369483776
+(55): Fin. CurMem=31956992 PeakMem=369881088
 pProblemFin.
 Min-placement step ends: Global placement and legalization. Runtime: 0:0:25 (CPU time), 0:0:25 (real time); peak memory: 1305MB.
 
 
-The current time is Wed Aug  5 09:30:36 2026
+The current time is Thu Aug  6 15:15:55 2026
 
 
 

@@ -15,13 +15,13 @@
                 63 of which are dual-FFs
                 63 of which are dual-LUT-dual-FF combination
                162 FFs total
-       7 I/O CLBs
-            8  Input pins
+      15 I/O CLBs
+            9  Input pins
             2  Input FFs utilized
             6 Output pins
             3 Output FFs utilized
        1 Clock
-           Clock 0: net   304, $auto$clkbufmap.cc:294:execute$13574, Fanout: 50 CLBs
+           Clock 0: net   304, $auto$clkbufmap.cc:294:execute$13574, Fanout: 52 CLBs
            Total 1 unique clocks
     need 0 DSP and 1 Logic-Memory FPGA 1K Tiles.
 
@@ -41,4 +41,4 @@ Usage of LUTs is 34.3%.
     dual-LUTs is 14.1%.
 Usage of FF is 17.7%.
     dual-FF is 11.2%.
-Usage of IO CLB is 3.8%.
+Usage of IO CLB is 8.2%.

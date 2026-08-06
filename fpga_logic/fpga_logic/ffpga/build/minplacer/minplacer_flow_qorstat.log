@@ -1,31 +1,32 @@
-#COLLECTE 3 WINNING_JOBS
-##PARALLEL JOB[2] (2,expjob_2) timing=21417 dir=minplacer\00002_pa02_00009_rplan
-##PARALLEL JOB[1] (1,expjob_1) timing=21013 dir=minplacer\00001_pa01_00009_rplan
-##PARALLEL JOB[0] (0,expjob_0) timing=20779 dir=minplacer\00000_pa00_00009_rplan
+#COLLECTE 4 WINNING_JOBS
+##PARALLEL JOB[3] (0,expjob_0) timing=21556 dir=minplacer\00000_pa00_00009_rplan
+##PARALLEL JOB[2] (3,expjob_3) timing=21465 dir=minplacer\00003_pa03_00009_rplan
+##PARALLEL JOB[1] (2,expjob_2) timing=21415 dir=minplacer\00002_pa02_00009_rplan
+##PARALLEL JOB[0] (1,expjob_1) timing=20932 dir=minplacer\00001_pa01_00009_rplan
 PrePlaceDly=102184
-#PLC_RUNDIR=minplacer\00000_pa00_00003_wl timing=13016 cg=0
-PlaceDly=13016
-TWL=25150
+#PLC_RUNDIR=minplacer\00001_pa01_00003_wl timing=12833 cg=0
+PlaceDly=12833
+TWL=25860
 PEAKMEM=1305MB
-#PLC_RUNDIR=minplacer\00000_pa00_00004_repopt timing=13016 cg=0
-PlaceDly=13016
-TWL=26090
+#PLC_RUNDIR=minplacer\00001_pa01_00004_repopt timing=12833 cg=0
+PlaceDly=12833
+TWL=26890
 PEAKMEM=1338MB
-#NLEDIT=minplacer\00000_pa00_00004_repopt\minplacer_nledit.txt
+#NLEDIT=minplacer\00001_pa01_00004_repopt\minplacer_nledit.txt
 REP=1
-#PLC_RUNDIR=minplacer\00000_pa00_00007_repwl timing=13016 cg=0
-PlaceDly=13016
-TWL=26370
+#PLC_RUNDIR=minplacer\00001_pa01_00007_repwl timing=12727 cg=0
+PlaceDly=12727
+TWL=27340
 PEAKMEM=1338MB
-#PLC_RUNDIR=minplacer\00000_pa00_00008_post timing=20779 cg=0
-PostIter=30
-PlaceDly=20779
-TWL=32660
+#PLC_RUNDIR=minplacer\00001_pa01_00008_post timing=20932 cg=0
+PostIter=22
+PlaceDly=20932
+TWL=28970
 PEAKMEM=1415MB
-TotPostIter=30
-#PLC_RUNDIR=minplacer\00000_pa00_00009_rplan timing=20779 cg=50
+TotPostIter=22
+#PLC_RUNDIR=minplacer\00001_pa01_00009_rplan timing=20932 cg=50
 FinderPnRatio=50
 FinderPnIter=0
-PlaceDly=20779
+PlaceDly=20932
 PEAKMEM=1374MB
-ParWin                              =expjob_0
+ParWin                              =expjob_1

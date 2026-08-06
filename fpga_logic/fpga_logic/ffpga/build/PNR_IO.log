@@ -5,27 +5,20 @@ EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=2
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=3
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=4
-   Output=0, pin=bridge_out[0], output_delay=0
-   Output=1, pin=bridge_out[1], output_delay=0
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=5
-   Output=0, pin=bridge_out[4], output_delay=-1
-   Output=1, pin=bridge_out[5], output_delay=0
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=6
+    Input=0, pin=bridge_in[0],  input_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=7
+    Input=0, pin=bridge_in[1],  input_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=8
-EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=9
-    Input=0, pin=bridge_strobe,  input_delay=-1
-    Input=1, pin=rst_n,  input_delay=-1
-EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=10
-EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=11
     Input=0, pin=bridge_in[2],  input_delay=-1
-    Input=1, pin=bridge_in[3],  input_delay=-1
-EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=12
-    Input=0, pin=bridge_in[0],  input_delay=0
-    Input=1, pin=bridge_in[1],  input_delay=0
-EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=13
+EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=9
+    Input=0, pin=bridge_in[3],  input_delay=-1
+EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=10
     Input=0, pin=bridge_in[4],  input_delay=-1
-    Input=1, pin=bridge_in[5],  input_delay=-1
+EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=11
+EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=12
+EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=13
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=14
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=15
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=16
@@ -35,8 +28,11 @@ EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=19
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=20
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=21
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=22
+    Input=0, pin=bridge_in[5],  input_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=23
+    Input=0, pin=bridge_strobe,  input_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=24
+    Input=0, pin=rst_n,  input_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=25
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=26
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=0, chip_y=27
@@ -49,8 +45,6 @@ EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=1, chip_y=1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=1, chip_y=30
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=1, chip_y=31
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=2, chip_y=0
-   Output=0, pin=bridge_out[2], output_delay=-1
-   Output=1, pin=bridge_out[3], output_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=2, chip_y=1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=2, chip_y=30
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=2, chip_y=31
@@ -171,11 +165,14 @@ EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=2
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=3
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=4
+    Input=0, pin=clk,  input_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=5
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=6
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=7
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=8
+   Output=0, pin=bridge_out[5], output_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=9
+   Output=0, pin=bridge_out[4], output_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=10
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=11
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=12
@@ -189,9 +186,13 @@ EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=19
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=20
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=21
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=22
+   Output=0, pin=bridge_out[3], output_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=23
+   Output=0, pin=bridge_out[2], output_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=24
+   Output=0, pin=bridge_out[1], output_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=25
+   Output=0, pin=bridge_out[0], output_delay=-1
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=26
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=27
 EFLX_IOB chip_tile_x=0, chip_tile_y=0, chip_x=31, chip_y=28
