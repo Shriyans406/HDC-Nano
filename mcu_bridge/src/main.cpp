@@ -3,29 +3,29 @@
 #include <ShrikeFlash.h>
 
 // ----------------------------------------------------------------------------
-// Pin Definitions (Matching Go Configure I/O Planner Matrix)
+// Pin Definitions (Matched to Phase 2 I/O Planner Matrix)
 // ----------------------------------------------------------------------------
 const int PIN_BUS_DATA[6] = {0, 1, 2,
-                             3, 4, 5}; // Outputs to FPGA bridge_in[0:5]
-const int PIN_STROBE = 6;              // Output to FPGA bridge_strobe
-const int PIN_RST_N = 7;               // Output to FPGA rst_n
-const int PIN_FPGA_CLK = 8;            // Output to FPGA clk
+                             3, 4, 5}; // Outputs -> FPGA GPIO0_IN - GPIO5_IN
+const int PIN_STROBE = 6;              // Output  -> FPGA GPIO6_IN
+const int PIN_RST_N = 7;               // Output  -> FPGA GPIO7_IN
+const int PIN_FPGA_CLK = 8;            // Output  -> FPGA GPIO18_IN
 
-const int PIN_FPGA_OUT[6] = {10, 11, 12,
-                             13, 14, 15}; // Inputs from FPGA bridge_out[0:5]
+const int PIN_FPGA_OUT[6] = {10, 11, 12, 13,
+                             14, 15}; // Inputs <- FPGA GPIO10_OUT - GPIO15_OUT
 
-// Bitstream parameters
 const char *BITSTREAM_PATH = "/hdc_core_bitstream.bin";
 
-// ----------------------------------------------------------------------------
-// Helper Functions
-// ----------------------------------------------------------------------------
+// Instance of Vicharak's ShrikeFlash driver
+ShrikeFlash fpgaFlasher;
 
+// ----------------------------------------------------------------------------
+// Low-level Bus Helpers
+// ----------------------------------------------------------------------------
 void sendNibbleToFPGA(uint8_t nibble6bit) {
   for (int i = 0; i < 6; i++) {
     digitalWrite(PIN_BUS_DATA[i], (nibble6bit >> i) & 0x01);
   }
-  // Pulse Strobe
   digitalWrite(PIN_STROBE, HIGH);
   delayMicroseconds(2);
   digitalWrite(PIN_STROBE, LOW);
@@ -42,7 +42,6 @@ uint8_t readFPGAOutput() {
   return val;
 }
 
-// Generates clock pulses if FPGA relies on external RP2040 clock
 void pulseClock(int cycles) {
   for (int i = 0; i < cycles; i++) {
     digitalWrite(PIN_FPGA_CLK, HIGH);
@@ -53,17 +52,16 @@ void pulseClock(int cycles) {
 }
 
 // ----------------------------------------------------------------------------
-// Setup: Bitstream Flash & Hardware Initialization
+// Setup
 // ----------------------------------------------------------------------------
 void setup() {
   Serial.begin(115200);
-  while (!Serial && millis() < 3000)
-    ; // Wait for Serial console connection
+  delay(2000); // Allow USB CDC to settle
 
   Serial.println(
-      "{\"status\":\"booting\",\"msg\":\"RP2040 Initialization Started\"}");
+      "{\"status\":\"booting\",\"msg\":\"RP2040 Shrike Bridge Initializing\"}");
 
-  // Configure GPIO directions
+  // Configure GPIOs
   for (int i = 0; i < 6; i++) {
     pinMode(PIN_BUS_DATA[i], OUTPUT);
     digitalWrite(PIN_BUS_DATA[i], LOW);
@@ -73,64 +71,68 @@ void setup() {
   digitalWrite(PIN_STROBE, LOW);
 
   pinMode(PIN_RST_N, OUTPUT);
-  digitalWrite(PIN_RST_N, LOW); // Hold FPGA in reset
+  digitalWrite(PIN_RST_N, LOW); // Hold FPGA in reset during flash
 
   pinMode(PIN_FPGA_CLK, OUTPUT);
   digitalWrite(PIN_FPGA_CLK, LOW);
 
-  // Initialize LittleFS to access bitstream file
+  // Initialize Earle Philhower LittleFS
   if (!LittleFS.begin()) {
-    Serial.println("{\"status\":\"error\",\"msg\":\"LittleFS Mount Failed!\"}");
+    Serial.println("{\"status\":\"error\",\"msg\":\"LittleFS Mount Failed. Did "
+                   "you run uploadfs?\"}");
     return;
   }
 
-  // Program SLG47910 ForgeFPGA using ShrikeFlash
-  Serial.println("{\"status\":\"flashing\",\"msg\":\"Flashing Bitstream to "
+  // Verify bitstream exists in LittleFS
+  if (!LittleFS.exists(BITSTREAM_PATH)) {
+    Serial.println("{\"status\":\"error\",\"msg\":\"hdc_core_bitstream.bin not "
+                   "found in LittleFS data directory!\"}");
+    return;
+  }
+
+  Serial.println("{\"status\":\"flashing\",\"msg\":\"Programming SLG47910 "
                  "ForgeFPGA...\"}");
 
-  ShrikeFlash fpgaFlasher;
-  bool flashedSuccessfully = fpgaFlasher.flashBitstream(BITSTREAM_PATH);
+  // Flash the bitstream file using ShrikeFlash
+  bool success = fpgaFlasher.flash(BITSTREAM_PATH);
 
-  if (flashedSuccessfully) {
+  if (success) {
     Serial.println(
-        "{\"status\":\"success\",\"msg\":\"FPGA Configured Successfully!\"}");
+        "{\"status\":\"success\",\"msg\":\"FPGA Configured Successfully\"}");
   } else {
-    Serial.println("{\"status\":\"error\",\"msg\":\"FPGA Flash Failed! Check "
-                   "connections.\"}");
+    Serial.println("{\"status\":\"error\",\"msg\":\"ShrikeFlash bitstream "
+                   "upload failed\"}");
   }
 
   // Release FPGA reset
-  delay(10);
+  delay(20);
   digitalWrite(PIN_RST_N, HIGH);
-  delay(10);
+  delay(20);
 
-  Serial.println(
-      "{\"status\":\"ready\",\"msg\":\"Nano-HDC Bridge Ready for Streaming\"}");
+  Serial.println("{\"status\":\"ready\",\"msg\":\"Nano-HDC Bridge Active\"}");
 }
 
 // ----------------------------------------------------------------------------
-// Main Loop: USB Serial Pass-through & Pipeline Execution
+// Main Communication Loop
 // ----------------------------------------------------------------------------
 void loop() {
-  // Expect 32 Hex Characters (128-bit Hypervector) from Host PC
   if (Serial.available() >= 32) {
     String hexString = Serial.readStringUntil('\n');
     hexString.trim();
 
     if (hexString.length() != 32) {
-      Serial.println("{\"status\":\"error\",\"msg\":\"Invalid vector length. "
-                     "Expected 32 hex chars.\"}");
+      Serial.println("{\"status\":\"error\",\"msg\":\"Expected 32 hex chars "
+                     "(128-bit HV)\"}");
       return;
     }
 
-    // Convert Hex String into 16-byte buffer
     uint8_t bytes[16];
     for (int i = 0; i < 16; i++) {
       String byteHex = hexString.substring(i * 2, (i * 2) + 2);
       bytes[i] = (uint8_t)strtol(byteHex.c_str(), NULL, 16);
     }
 
-    // 1. Stream 128-bit vector to FPGA over 6-bit bus (22 nibble transmissions)
+    // Stream 128 bits into FPGA over 6-bit bus
     int totalBits = 128;
     int currentBitIndex = 0;
 
@@ -147,20 +149,18 @@ void loop() {
       }
 
       sendNibbleToFPGA(nibble);
-      pulseClock(2); // Provide FPGA computation clock cycles
+      pulseClock(2);
       currentBitIndex += 6;
     }
 
-    // 2. Pulse clocks to let FPGA complete distance calculation across all
-    // classes
+    // Pulse clocks for FPGA state machine calculation
     pulseClock(100);
 
-    // 3. Read FPGA Prediction from Output Bus
+    // Read prediction result
     uint8_t fpgaResult = readFPGAOutput();
     bool doneFlag = (fpgaResult >> 5) & 0x01;
     uint8_t predictedClass = fpgaResult & 0x03;
 
-    // 4. Return result over Serial to Dashboard
     if (doneFlag) {
       Serial.print("{\"status\":\"result\",\"predictedClass\":");
       Serial.print(predictedClass);
@@ -168,8 +168,8 @@ void loop() {
       Serial.print(hexString);
       Serial.println("\"}");
     } else {
-      Serial.println("{\"status\":\"error\",\"msg\":\"FPGA timed out or "
-                     "inference incomplete.\"}");
+      Serial.println(
+          "{\"status\":\"error\",\"msg\":\"FPGA prediction timeout\"}");
     }
   }
 }
