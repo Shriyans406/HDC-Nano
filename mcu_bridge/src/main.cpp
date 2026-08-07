@@ -1,22 +1,20 @@
 #include <Arduino.h>
 #include <LittleFS.h>
-#include <ShrikeFlash.h>
+#include <Shrike.h> // Updated from ShrikeFlash.h
 
 // ----------------------------------------------------------------------------
 // Pin Definitions (Matched to Phase 2 I/O Planner Matrix)
 // ----------------------------------------------------------------------------
-const int PIN_BUS_DATA[6] = {0, 1, 2,
-                             3, 4, 5}; // Outputs -> FPGA GPIO0_IN - GPIO5_IN
-const int PIN_STROBE = 6;              // Output  -> FPGA GPIO6_IN
-const int PIN_RST_N = 7;               // Output  -> FPGA GPIO7_IN
-const int PIN_FPGA_CLK = 8;            // Output  -> FPGA GPIO18_IN
+const int PIN_BUS_DATA[6] = {0, 1, 2, 3, 4, 5};
+const int PIN_STROBE = 6;
+const int PIN_RST_N = 7;
+const int PIN_FPGA_CLK = 8;
 
-const int PIN_FPGA_OUT[6] = {10, 11, 12, 13,
-                             14, 15}; // Inputs <- FPGA GPIO10_OUT - GPIO15_OUT
+const int PIN_FPGA_OUT[6] = {10, 11, 12, 13, 14, 15};
 
 const char *BITSTREAM_PATH = "/hdc_core_bitstream.bin";
 
-// Instance of Vicharak's ShrikeFlash driver
+// Instance of Vicharak's Shrike driver
 ShrikeFlash fpgaFlasher;
 
 // ----------------------------------------------------------------------------
@@ -92,6 +90,9 @@ void setup() {
 
   Serial.println("{\"status\":\"flashing\",\"msg\":\"Programming SLG47910 "
                  "ForgeFPGA...\"}");
+
+  // Initialize Shrike Flash driver
+  fpgaFlasher.begin();
 
   // Flash the bitstream file using ShrikeFlash
   bool success = fpgaFlasher.flash(BITSTREAM_PATH);
