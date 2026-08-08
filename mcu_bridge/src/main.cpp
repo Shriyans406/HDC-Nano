@@ -117,13 +117,32 @@ void setup() {
 // Main Communication Loop
 // ----------------------------------------------------------------------------
 void loop() {
-  if (Serial.available() >= 32) {
+  if (Serial.available() > 0) {
     String hexString = Serial.readStringUntil('\n');
     hexString.trim();
 
+    if (hexString.length() == 0) return;
+
+    if (hexString.equalsIgnoreCase("REFLASH")) {
+      setup();
+      return;
+    }
+
+    if (hexString.equalsIgnoreCase("RESET")) {
+      digitalWrite(PIN_RST_N, LOW);
+      delay(20);
+      digitalWrite(PIN_RST_N, HIGH);
+      delay(20);
+      Serial.println("{\"status\":\"reset\",\"msg\":\"FPGA Reset Complete\"}");
+      return;
+    }
+
     if (hexString.length() != 32) {
-      Serial.println("{\"status\":\"error\",\"msg\":\"Expected 32 hex chars "
-                     "(128-bit HV)\"}");
+      Serial.print("{\"status\":\"error\",\"msg\":\"Expected 32 hex chars (128-bit HV), got ");
+      Serial.print(hexString.length());
+      Serial.print(" chars: '");
+      Serial.print(hexString);
+      Serial.println("'\"}");
       return;
     }
 
@@ -133,19 +152,21 @@ void loop() {
       bytes[i] = (uint8_t)strtol(byteHex.c_str(), NULL, 16);
     }
 
-    // Stream 128 bits into FPGA over 6-bit bus
+    // Stream 128 bits into FPGA over 6-bit bus (MSB-first to match hdc_core.v shift register)
     int totalBits = 128;
     int currentBitIndex = 0;
 
     while (currentBitIndex < totalBits) {
       uint8_t nibble = 0;
-      for (int b = 0; b < 6 && (currentBitIndex + b) < totalBits; b++) {
+      int numBitsInNibble = min(6, totalBits - currentBitIndex);
+
+      for (int b = 0; b < numBitsInNibble; b++) {
         int overallBit = currentBitIndex + b;
         int byteIdx = overallBit / 8;
         int bitIdx = 7 - (overallBit % 8);
 
         if ((bytes[byteIdx] >> bitIdx) & 0x01) {
-          nibble |= (1 << b);
+          nibble |= (1 << (numBitsInNibble - 1 - b));
         }
       }
 
