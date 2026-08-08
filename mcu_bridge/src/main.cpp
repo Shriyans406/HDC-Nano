@@ -10,7 +10,7 @@ const int PIN_STROBE = 6;
 const int PIN_RST_N = 7;
 const int PIN_FPGA_CLK = 8;
 
-const int PIN_FPGA_OUT[6] = {10, 11, 12, 13, 14, 15};
+const int PIN_FPGA_OUT[6] = {15, 14, 13, 12, 11, 10};
 
 const char *BITSTREAM_PATH = "/hdc_core_bitstream.bin";
 
@@ -20,7 +20,14 @@ ShrikeFlash fpgaFlasher;
 // ----------------------------------------------------------------------------
 // Low-level Bus Helpers
 // ----------------------------------------------------------------------------
-void pulseClock(int cycles);
+void pulseClock(int cycles) {
+  for (int i = 0; i < cycles; i++) {
+    digitalWrite(PIN_FPGA_CLK, HIGH);
+    delayMicroseconds(1);
+    digitalWrite(PIN_FPGA_CLK, LOW);
+    delayMicroseconds(1);
+  }
+}
 
 void sendNibbleToFPGA(uint8_t nibble6bit) {
   for (int i = 0; i < 6; i++) {
@@ -36,27 +43,14 @@ void sendNibbleToFPGA(uint8_t nibble6bit) {
 }
 
 uint8_t readFPGAOutput() {
-  // Set shared bus pins to INPUT mode to read result from FPGA
-  for (int i = 0; i < 6; i++) {
-    pinMode(PIN_BUS_DATA[i], INPUT);
-  }
-
   uint8_t val = 0;
   for (int i = 0; i < 6; i++) {
-    if (digitalRead(PIN_BUS_DATA[i]) == HIGH) {
+    pinMode(PIN_FPGA_OUT[i], INPUT);
+    if (digitalRead(PIN_FPGA_OUT[i]) == HIGH) {
       val |= (1 << i);
     }
   }
   return val;
-}
-
-void pulseClock(int cycles) {
-  for (int i = 0; i < cycles; i++) {
-    digitalWrite(PIN_FPGA_CLK, HIGH);
-    delayMicroseconds(1);
-    digitalWrite(PIN_FPGA_CLK, LOW);
-    delayMicroseconds(1);
-  }
 }
 
 // ----------------------------------------------------------------------------
@@ -69,20 +63,24 @@ void setup() {
   Serial.println(
       "{\"status\":\"booting\",\"msg\":\"RP2040 Shrike Bridge Initializing\"}");
 
-  // Configure GPIOs
+  // Initialize bus pins
   for (int i = 0; i < 6; i++) {
     pinMode(PIN_BUS_DATA[i], OUTPUT);
     digitalWrite(PIN_BUS_DATA[i], LOW);
-    pinMode(PIN_FPGA_OUT[i], INPUT);
   }
+
   pinMode(PIN_STROBE, OUTPUT);
   digitalWrite(PIN_STROBE, LOW);
 
   pinMode(PIN_RST_N, OUTPUT);
-  digitalWrite(PIN_RST_N, LOW); // Hold FPGA in reset during flash
+  digitalWrite(PIN_RST_N, LOW);
 
   pinMode(PIN_FPGA_CLK, OUTPUT);
   digitalWrite(PIN_FPGA_CLK, LOW);
+
+  for (int i = 0; i < 6; i++) {
+    pinMode(PIN_FPGA_OUT[i], INPUT_PULLDOWN);
+  }
 
   // Initialize Earle Philhower LittleFS
   if (!LittleFS.begin()) {
@@ -118,15 +116,12 @@ void setup() {
                    "upload failed\"}");
   }
 
-  // Release FPGA reset
-  delay(20);
+  // Pulse FPGA Reset (RST_N) LOW then HIGH after flashing to guarantee clean STATE_IDLE
+  digitalWrite(PIN_RST_N, LOW);
+  delay(10);
   digitalWrite(PIN_RST_N, HIGH);
-  delay(20);
-
-  // Re-configure FPGA output pins as INPUT after ShrikeFlash finishes using GP12/13
-  for (int i = 0; i < 6; i++) {
-    pinMode(PIN_FPGA_OUT[i], INPUT);
-  }
+  delay(10);
+  pulseClock(10);
 
   Serial.println("{\"status\":\"ready\",\"msg\":\"Nano-HDC Bridge Active\"}");
 }
@@ -164,9 +159,17 @@ void loop() {
       return;
     }
 
+    // Pulse RST_N to guarantee clean STATE_IDLE before starting new hypervector
+    digitalWrite(PIN_RST_N, LOW);
+    delay(10);
+    digitalWrite(PIN_RST_N, HIGH);
+    delay(10);
+    pulseClock(10);
+
+    // Convert 32-char hex string to 16 bytes (128 bits)
     uint8_t bytes[16];
     for (int i = 0; i < 16; i++) {
-      String byteHex = hexString.substring(i * 2, (i * 2) + 2);
+      String byteHex = hexString.substring(i * 2, i * 2 + 2);
       bytes[i] = (uint8_t)strtol(byteHex.c_str(), NULL, 16);
     }
 
@@ -181,7 +184,7 @@ void loop() {
           int byteIdx = overallBit / 8;
           int bitIdx = 7 - (overallBit % 8);
           if ((bytes[byteIdx] >> bitIdx) & 0x01) {
-            nibble |= (1 << (5 - b));
+            nibble |= (1 << b);
           }
         }
       }
@@ -190,20 +193,19 @@ void loop() {
 
     // Nibble 23: Send final bits with STROBE held HIGH to initiate and maintain COMPUTE -> DONE state
     uint8_t finalNibble = 0;
-    int startBit23 = 22 * 6; // bit 132... bit 126 and 127
+    int startBit23 = 22 * 6;
     for (int b = 0; b < 6; b++) {
       int overallBit = startBit23 + b;
       if (overallBit < 128) {
         int byteIdx = overallBit / 8;
         int bitIdx = 7 - (overallBit % 8);
         if ((bytes[byteIdx] >> bitIdx) & 0x01) {
-          finalNibble |= (1 << (5 - b));
+          finalNibble |= (1 << b);
         }
       }
     }
 
     for (int i = 0; i < 6; i++) {
-      pinMode(PIN_BUS_DATA[i], OUTPUT);
       digitalWrite(PIN_BUS_DATA[i], (finalNibble >> i) & 0x01);
     }
     digitalWrite(PIN_STROBE, HIGH);
@@ -212,18 +214,13 @@ void loop() {
     delayMicroseconds(2);
     // STROBE remains HIGH so hdc_core.v holds STATE_DONE after computing!
 
-    // Set shared bus pins to INPUT mode so FPGA can drive bridge_out
-    for (int i = 0; i < 6; i++) {
-      pinMode(PIN_BUS_DATA[i], INPUT);
-    }
-
     // Pulse clock for computation (64 cycles needed for 4 classes x 16 slices)
     pulseClock(80);
 
     // Read result while STROBE is still HIGH (FPGA is latched in STATE_DONE)
     uint8_t fpgaResult = readFPGAOutput();
-    bool doneFlag = (fpgaResult >> 5) & 0x01;
-    uint8_t predictedClass = fpgaResult & 0x03;
+    bool doneFlag = (digitalRead(12) == HIGH) || (digitalRead(13) == HIGH);
+    uint8_t predictedClass = ((digitalRead(14) == HIGH ? 1 : 0) << 1) | (digitalRead(15) == HIGH ? 1 : 0);
 
     // Release STROBE to LOW and clock once so FPGA returns to STATE_IDLE
     digitalWrite(PIN_STROBE, LOW);
