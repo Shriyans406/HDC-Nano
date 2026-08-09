@@ -10,7 +10,7 @@ const int PIN_STROBE = 6;
 const int PIN_RST_N = 7;
 const int PIN_FPGA_CLK = 8;
 
-const int PIN_FPGA_OUT[6] = {15, 14, 13, 12, 11, 10};
+const int PIN_FPGA_OUT[6] = {10, 11, 12, 13, 14, 15};
 
 const char *BITSTREAM_PATH = "/hdc_core_bitstream.bin";
 
@@ -191,7 +191,7 @@ void loop() {
       sendNibbleToFPGA(nibble);
     }
 
-    // Nibble 23: Send final bits with STROBE held HIGH to initiate and maintain COMPUTE -> DONE state
+    // Send Nibble 23 with STROBE held HIGH to initiate and maintain COMPUTE -> DONE state
     uint8_t finalNibble = 0;
     int startBit23 = 22 * 6;
     for (int b = 0; b < 6; b++) {
@@ -219,8 +219,8 @@ void loop() {
 
     // Read result while STROBE is still HIGH (FPGA is latched in STATE_DONE)
     uint8_t fpgaResult = readFPGAOutput();
-    bool doneFlag = (digitalRead(12) == HIGH) || (digitalRead(13) == HIGH);
-    uint8_t predictedClass = ((digitalRead(14) == HIGH ? 1 : 0) << 1) | (digitalRead(15) == HIGH ? 1 : 0);
+    bool doneFlag = (fpgaResult >> 5) & 0x01;
+    uint8_t predictedClass = fpgaResult & 0x03;
 
     // Release STROBE to LOW and clock once so FPGA returns to STATE_IDLE
     digitalWrite(PIN_STROBE, LOW);
