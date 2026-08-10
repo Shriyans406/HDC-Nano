@@ -1,0 +1,15 @@
+{
+  "name": "hdc-serial-gateway",
+  "version": "1.0.0",
+  "description": "Real-time Node.js Serial-to-WebSocket bridge for HDC ForgeFPGA",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "mock": "node mock_generator.js"
+  },
+  "dependencies": {
+    "serialport": "^13.0.0",
+    "ws": "^8.21.3"
+  }
+}
