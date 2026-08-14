@@ -2,7 +2,7 @@ import { SerialPort } from 'serialport';
 import { ReadlineParser } from '@serialport/parser-readline';
 import { WebSocketServer } from 'ws';
 
-// Set your default Windows COM port here (e.g. 'COM3' or 'COM4')
+// Set directly to your Windows port COM5
 const SERIAL_PATH = process.env.SERIAL_PORT || 'COM5';
 const BAUD_RATE = 115200;
 const WS_PORT = 8080;
@@ -47,18 +47,28 @@ const port = new SerialPort({
     autoOpen: false
 });
 
-// Create line-delimited parser matching RP2040 Serial.println()
 const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
 port.open((err) => {
     if (err) {
-        console.error(`[HDC Gateway] Serial port error on ${SERIAL_PATH}: ${err.message}`);
-        console.log(`\n[FIX HINT] Check Device Manager -> Ports (COM & LPT).`);
-        console.log(`Run command with your COM port:`);
-        console.log(`$env:SERIAL_PORT="COM5"; npm start\n`);
+        console.error(`[HDC Gateway Error] Could not open ${SERIAL_PATH}: ${err.message}`);
         return;
     }
-    console.log(`[HDC Gateway] Connected to RP2040 on ${SERIAL_PATH}`);
+    console.log(`[HDC Gateway] Serial Port ${SERIAL_PATH} Connected Successfully!`);
+
+    // --- AUTO-FEEDER LOOP ---
+    // Sends a 32-character hex hypervector to RP2040 every 200ms (5 Hz)
+    setInterval(() => {
+        if (port.isOpen) {
+            const sampleHex = Array.from({ length: 32 }, () =>
+                Math.floor(Math.random() * 16).toString(16)
+            ).join('').toUpperCase();
+
+            port.write(sampleHex + '\n', (err) => {
+                if (err) console.error('[Send Error]', err.message);
+            });
+        }
+    }, 200);
 });
 
 parser.on('data', (line) => {
@@ -68,11 +78,10 @@ parser.on('data', (line) => {
     try {
         const mcuData = JSON.parse(trimmed);
 
-        // Handle FPGA Result Telemetry
         if (mcuData.status === 'result') {
             const hexStr = mcuData.hex || '00000000000000000000000000000000';
 
-            // Expand 32-character hex string into 128-bit array
+            // Convert 32 hex characters to 128 bit array
             const bitArray = [];
             for (let i = 0; i < hexStr.length; i++) {
                 const nibble = parseInt(hexStr[i], 16);
@@ -96,14 +105,13 @@ parser.on('data', (line) => {
 
             broadcastPacket(packet);
         } else {
-            // Print boot/flash status messages from RP2040
-            console.log(`[MCU Log]`, mcuData);
+            console.log(`[MCU Message]:`, mcuData);
         }
     } catch (e) {
-        console.log(`[Raw MCU Serial Output]: ${trimmed}`);
+        console.log(`[Raw Serial]: ${trimmed}`);
     }
 });
 
 port.on('error', (err) => {
-    console.error(`[HDC Serial Error] ${err.message}`);
+    console.error(`[Serial Error] ${err.message}`);
 });
