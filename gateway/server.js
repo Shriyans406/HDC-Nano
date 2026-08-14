@@ -15,6 +15,49 @@ const GESTURE_CLASSES = {
     255: 'Unclassified / Idle'
 };
 
+// ============================================================================
+// FILTERING & SMOOTHING BUFFERS
+// ============================================================================
+const DISTANCE_WINDOW_SIZE = 5; // Averaging last 5 frames for Hamming Distance
+const CLASS_STABILITY_COUNT = 3; // Class must match 3 consecutive frames to lock
+
+const distanceHistory = [];
+const classHistory = [];
+
+let currentLockedClass = 255; // Default idle class
+
+/**
+ * Calculates moving average of array numbers
+ */
+function getAverage(arr) {
+    if (arr.length === 0) return 0;
+    const sum = arr.reduce((acc, val) => acc + val, 0);
+    return Math.round(sum / arr.length);
+}
+
+/**
+ * Checks if the last N predictions are identical to lock in a stable class
+ */
+function getStabilizedClass(newClass) {
+    classHistory.push(newClass);
+    if (classHistory.length > CLASS_STABILITY_COUNT) {
+        classHistory.shift();
+    }
+
+    // Check if all items in classHistory match
+    const allMatch = classHistory.length === CLASS_STABILITY_COUNT &&
+        classHistory.every(c => c === newClass);
+
+    if (allMatch) {
+        currentLockedClass = newClass;
+    }
+
+    return currentLockedClass;
+}
+
+// ============================================================================
+// WEBSOCKET & SERIAL SETUP
+// ============================================================================
 const wss = new WebSocketServer({ port: WS_PORT });
 console.log(`[HDC Gateway] WebSocket Server live on ws://localhost:${WS_PORT}`);
 
@@ -56,8 +99,7 @@ port.open((err) => {
     }
     console.log(`[HDC Gateway] Serial Port ${SERIAL_PATH} Connected Successfully!`);
 
-    // --- AUTO-FEEDER LOOP ---
-    // Sends a 32-character hex hypervector to RP2040 every 200ms (5 Hz)
+    // --- AUTO-FEEDER LOOP (Sends 128-bit hex test vectors every 100ms) ---
     setInterval(() => {
         if (port.isOpen) {
             const sampleHex = Array.from({ length: 32 }, () =>
@@ -68,9 +110,12 @@ port.open((err) => {
                 if (err) console.error('[Send Error]', err.message);
             });
         }
-    }, 200);
+    }, 100);
 });
 
+// ============================================================================
+// INCOMING TELEMETRY PROCESSING WITH SMOOTHING
+// ============================================================================
 parser.on('data', (line) => {
     const trimmed = line.trim();
     if (!trimmed) return;
@@ -80,8 +125,20 @@ parser.on('data', (line) => {
 
         if (mcuData.status === 'result') {
             const hexStr = mcuData.hex || '00000000000000000000000000000000';
+            const rawDistance = mcuData.raw ?? 0;
+            const rawPredictedClass = mcuData.predictedClass ?? 255;
 
-            // Convert 32 hex characters to 128 bit array
+            // 1. Hamming Distance Moving Average
+            distanceHistory.push(rawDistance);
+            if (distanceHistory.length > DISTANCE_WINDOW_SIZE) {
+                distanceHistory.shift();
+            }
+            const smoothedDistance = getAverage(distanceHistory);
+
+            // 2. Class Prediction Debounce (3 consecutive frames)
+            const stabilizedClass = getStabilizedClass(rawPredictedClass);
+
+            // 3. Convert 32 Hex Chars to 128-bit array for grid display
             const bitArray = [];
             for (let i = 0; i < hexStr.length; i++) {
                 const nibble = parseInt(hexStr[i], 16);
@@ -90,15 +147,17 @@ parser.on('data', (line) => {
                 }
             }
 
-            const predictedClass = mcuData.predictedClass ?? 255;
+            // Calculate smoothed match score percentage
+            const smoothedScore = parseFloat((((128 - smoothedDistance) / 128) * 100).toFixed(1));
 
             const packet = {
                 timestamp: Date.now(),
                 packetType: 1,
-                classId: predictedClass,
-                className: GESTURE_CLASSES[predictedClass] || `Class ${predictedClass}`,
-                hammingDistance: mcuData.raw ?? 0,
-                matchScore: parseFloat((((128 - (mcuData.raw ?? 0)) / 128) * 100).toFixed(1)),
+                classId: stabilizedClass,
+                className: GESTURE_CLASSES[stabilizedClass] || `Class ${stabilizedClass}`,
+                hammingDistance: smoothedDistance,
+                rawHammingDistance: rawDistance, // Sent for reference/debug
+                matchScore: smoothedScore,
                 hypervector: bitArray,
                 rawBytesHex: hexStr
             };
