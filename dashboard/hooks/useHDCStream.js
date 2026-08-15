@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export function useHDCStream(wsUrl = 'ws://localhost:8080') {
+export function useHDCStream(wsUrl = 'ws://localhost:8080', isFrozen = false) {
     const [packet, setPacket] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
     const [fps, setFps] = useState(0);
@@ -9,6 +9,11 @@ export function useHDCStream(wsUrl = 'ws://localhost:8080') {
 
     const frameCount = useRef(0);
     const wsRef = useRef(null);
+    const isFrozenRef = useRef(isFrozen);
+
+    useEffect(() => {
+        isFrozenRef.current = isFrozen;
+    }, [isFrozen]);
 
     useEffect(() => {
         const fpsInterval = setInterval(() => {
@@ -25,6 +30,8 @@ export function useHDCStream(wsUrl = 'ws://localhost:8080') {
             };
 
             ws.onmessage = (event) => {
+                if (isFrozenRef.current) return;
+
                 try {
                     const data = JSON.parse(event.data);
                     const now = Date.now();

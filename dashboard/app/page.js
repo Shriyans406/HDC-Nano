@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useHDCStream } from '../hooks/useHDCStream';
 import { ClassPredictionCard } from '../components/ClassPredictionCard';
 import { HammingDistanceGauge } from '../components/HammingDistanceGauge';
@@ -8,7 +8,10 @@ import { HypervectorHeatmap } from '../components/HypervectorHeatmap';
 import { TelemetryBar } from '../components/TelemetryBar';
 
 export default function HDCDashboard() {
-  const { packet, isConnected, fps, totalPackets, latency } = useHDCStream('ws://localhost:8080');
+  const [isFrozen, setIsFrozen] = useState(false);
+  const { packet, isConnected, fps, totalPackets, latency } = useHDCStream('ws://localhost:8080', isFrozen);
+
+  const activeBitCount = packet?.hypervector?.filter((bit) => bit === 1).length ?? 0;
 
   return (
     <main className="min-h-screen bg-hdc-dark text-slate-100 p-6 md:p-10 font-sans">
@@ -23,13 +26,38 @@ export default function HDCDashboard() {
             </p>
           </div>
 
-          <div className="text-right font-mono text-xs bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">
-            <span className="text-slate-500">SYSTEM STATUS:</span>{' '}
-            <span className={isConnected ? 'text-hdc-green font-bold' : 'text-hdc-red font-bold'}>
-              {isConnected ? 'STREAMING' : 'OFFLINE'}
-            </span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsFrozen((prev) => !prev)}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                isFrozen
+                  ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
+                  : 'bg-cyan-600 hover:bg-cyan-500 text-white'
+              }`}
+            >
+              {isFrozen ? '▶ Resume Stream' : '⏸ Freeze Frame'}
+            </button>
+
+            <div className="text-right font-mono text-xs bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">
+              <span className="text-slate-500">SYSTEM STATUS:</span>{' '}
+              <span className={isConnected ? 'text-hdc-green font-bold' : 'text-hdc-red font-bold'}>
+                {isConnected ? (isFrozen ? 'FROZEN' : 'STREAMING') : 'OFFLINE'}
+              </span>
+            </div>
           </div>
         </header>
+
+        {isFrozen && packet && (
+          <div className="mb-2 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col md:flex-row md:items-center md:justify-between gap-2 font-mono text-sm text-amber-300">
+            <span>
+              FROZEN FRAME HEX: <strong className="text-amber-200">{packet.rawBytesHex}</strong>
+            </span>
+            <span>
+              ACTIVE BITS: <strong className="text-amber-200">{activeBitCount}</strong> / 128
+            </span>
+          </div>
+        )}
 
         <TelemetryBar
           isConnected={isConnected}
