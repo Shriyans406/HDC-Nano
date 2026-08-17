@@ -6,6 +6,7 @@ import { WebSocketServer } from "ws";
 const SERIAL_PATH = process.env.SERIAL_PORT || "COM5";
 const BAUD_RATE = 115200;
 const WS_PORT = 8080;
+const RECONNECT_DELAY_MS = 2000;
 
 const GESTURE_CLASSES = {
   0: "Circle Gesture",
@@ -73,6 +74,15 @@ wss.on("connection", (ws) => {
     `[HDC Gateway] Dashboard connected. Active clients: ${activeClients}`,
   );
 
+  ws.send(
+    JSON.stringify({
+      packetType: 0,
+      systemStatus: port.isOpen ? "ONLINE" : "HARDWARE_DISCONNECTED",
+      connectedPort: SERIAL_PATH,
+      timestamp: Date.now(),
+    }),
+  );
+
   ws.on("close", () => {
     activeClients--;
     console.log(
@@ -100,19 +110,13 @@ const port = new SerialPort({
 
 const parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
 
-port.open((err) => {
-  if (err) {
-    console.error(
-      `[HDC Gateway Error] Could not open ${SERIAL_PATH}: ${err.message}`,
-    );
-    return;
-  }
-  console.log(
-    `[HDC Gateway] Serial Port ${SERIAL_PATH} Connected Successfully!`,
-  );
+let isReconnecting = false;
+let autoFeederTimer = null;
 
-  // --- AUTO-FEEDER LOOP (Sends 128-bit hex test vectors every 100ms) ---
-  setInterval(() => {
+function startAutoFeeder() {
+  if (autoFeederTimer) clearInterval(autoFeederTimer);
+
+  autoFeederTimer = setInterval(() => {
     if (port.isOpen) {
       const sampleHex = Array.from({ length: 32 }, () =>
         Math.floor(Math.random() * 16).toString(16),
@@ -121,10 +125,75 @@ port.open((err) => {
         .toUpperCase();
 
       port.write(sampleHex + "\n", (err) => {
-        if (err) console.error("[Send Error]", err.message);
+        if (err) {
+          // ignore transient write failures during USB reconnect windows
+        }
       });
     }
   }, 100);
+}
+
+function stopAutoFeeder() {
+  if (autoFeederTimer) {
+    clearInterval(autoFeederTimer);
+    autoFeederTimer = null;
+  }
+}
+
+function connectSerial() {
+  if (port.isOpen || isReconnecting) return;
+
+  isReconnecting = true;
+  console.log(`[Serial Watchdog] Connecting to ${SERIAL_PATH}...`);
+
+  port.open((err) => {
+    isReconnecting = false;
+
+    if (err) {
+      console.error(
+        `[Serial Watchdog] ${SERIAL_PATH} unavailable (${err.message}). Retrying in ${RECONNECT_DELAY_MS / 1000}s...`,
+      );
+      broadcastPacket({
+        packetType: 0,
+        systemStatus: "HARDWARE_DISCONNECTED",
+        connectedPort: SERIAL_PATH,
+        timestamp: Date.now(),
+      });
+      setTimeout(connectSerial, RECONNECT_DELAY_MS);
+      return;
+    }
+
+    console.log(
+      `[HDC Gateway] Serial Port ${SERIAL_PATH} Connected Successfully!`,
+    );
+    broadcastPacket({
+      packetType: 0,
+      systemStatus: "ONLINE",
+      connectedPort: SERIAL_PATH,
+      timestamp: Date.now(),
+    });
+    startAutoFeeder();
+  });
+}
+
+connectSerial();
+
+port.on("close", () => {
+  stopAutoFeeder();
+  console.warn(
+    `[Serial Watchdog] Connection to ${SERIAL_PATH} lost! Initiating auto-recovery loop...`,
+  );
+  broadcastPacket({
+    packetType: 0,
+    systemStatus: "HARDWARE_DISCONNECTED",
+    connectedPort: SERIAL_PATH,
+    timestamp: Date.now(),
+  });
+  setTimeout(connectSerial, RECONNECT_DELAY_MS);
+});
+
+port.on("error", (err) => {
+  console.error(`[Serial Hardware Guard] Trapped error: ${err.message}`);
 });
 
 // ============================================================================
@@ -133,6 +202,10 @@ port.open((err) => {
 parser.on("data", (line) => {
   const trimmed = line.trim();
   if (!trimmed) return;
+
+  if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) {
+    return;
+  }
 
   try {
     const mcuData = JSON.parse(trimmed);
@@ -198,10 +271,25 @@ parser.on("data", (line) => {
       console.log(`[MCU Message]:`, mcuData);
     }
   } catch (e) {
-    console.log(`[Raw Serial]: ${trimmed}`);
+    console.error(`[JSON Guard] Bypassed corrupted serial payload:`, e.message);
   }
 });
 
-port.on("error", (err) => {
-  console.error(`[Serial Error] ${err.message}`);
-});
+function shutdown(signal) {
+  console.log(`\n[HDC Gateway] Shutting down cleanly (${signal})...`);
+  stopAutoFeeder();
+
+  if (port.isOpen) {
+    port.close(() =>
+      console.log("[HDC Gateway] Serial port released cleanly."),
+    );
+  }
+
+  wss.close(() => {
+    console.log("[HDC Gateway] WebSocket server closed.");
+    process.exit(0);
+  });
+}
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
