@@ -7,6 +7,7 @@ const SERIAL_PATH = process.env.SERIAL_PORT || "COM5";
 const BAUD_RATE = 115200;
 const WS_PORT = 8080;
 const RECONNECT_DELAY_MS = 2000;
+const SHUTDOWN_TIMEOUT_MS = 3000;
 
 const GESTURE_CLASSES = {
   0: "Circle Gesture",
@@ -112,12 +113,13 @@ const parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
 
 let isReconnecting = false;
 let autoFeederTimer = null;
+let isShuttingDown = false;
 
 function startAutoFeeder() {
   if (autoFeederTimer) clearInterval(autoFeederTimer);
 
   autoFeederTimer = setInterval(() => {
-    if (port.isOpen) {
+    if (port.isOpen && !isShuttingDown) {
       const sampleHex = Array.from({ length: 32 }, () =>
         Math.floor(Math.random() * 16).toString(16),
       )
@@ -141,7 +143,7 @@ function stopAutoFeeder() {
 }
 
 function connectSerial() {
-  if (port.isOpen || isReconnecting) return;
+  if (port.isOpen || isReconnecting || isShuttingDown) return;
 
   isReconnecting = true;
   console.log(`[Serial Watchdog] Connecting to ${SERIAL_PATH}...`);
@@ -276,18 +278,50 @@ parser.on("data", (line) => {
 });
 
 function shutdown(signal) {
-  console.log(`\n[HDC Gateway] Shutting down cleanly (${signal})...`);
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  console.log(
+    `\n[HDC Gateway] Received ${signal}. Executing clean teardown...`,
+  );
+
+  const forceExitTimeout = setTimeout(() => {
+    console.error(
+      "[HDC Gateway] Forced exit timeout reached. Hard terminating.",
+    );
+    process.exit(1);
+  }, SHUTDOWN_TIMEOUT_MS);
+
   stopAutoFeeder();
 
-  if (port.isOpen) {
-    port.close(() =>
-      console.log("[HDC Gateway] Serial port released cleanly."),
-    );
-  }
+  wss.clients.forEach((client) => {
+    client.close(1001, "Server shutting down");
+  });
 
   wss.close(() => {
-    console.log("[HDC Gateway] WebSocket server closed.");
-    process.exit(0);
+    console.log("[HDC Gateway] WebSocket Server terminated.");
+
+    if (port.isOpen) {
+      port.drain(() => {
+        port.close((err) => {
+          clearTimeout(forceExitTimeout);
+          if (err) {
+            console.error(
+              `[HDC Gateway] Error releasing ${SERIAL_PATH}: ${err.message}`,
+            );
+          } else {
+            console.log(
+              `[HDC Gateway] Serial Port ${SERIAL_PATH} handle cleanly released.`,
+            );
+          }
+          process.exit(0);
+        });
+      });
+    } else {
+      clearTimeout(forceExitTimeout);
+      console.log("[HDC Gateway] Cleanup complete. Exiting.");
+      process.exit(0);
+    }
   });
 }
 
