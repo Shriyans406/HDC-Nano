@@ -152,16 +152,18 @@ function connectSerial() {
     isReconnecting = false;
 
     if (err) {
-      console.error(
-        `[Serial Watchdog] ${SERIAL_PATH} unavailable (${err.message}). Retrying in ${RECONNECT_DELAY_MS / 1000}s...`,
-      );
-      broadcastPacket({
-        packetType: 0,
-        systemStatus: "HARDWARE_DISCONNECTED",
-        connectedPort: SERIAL_PATH,
-        timestamp: Date.now(),
-      });
-      setTimeout(connectSerial, RECONNECT_DELAY_MS);
+      if (!isShuttingDown) {
+        console.error(
+          `[Serial Watchdog] ${SERIAL_PATH} unavailable (${err.message}). Retrying in ${RECONNECT_DELAY_MS / 1000}s...`,
+        );
+        broadcastPacket({
+          packetType: 0,
+          systemStatus: "HARDWARE_DISCONNECTED",
+          connectedPort: SERIAL_PATH,
+          timestamp: Date.now(),
+        });
+        setTimeout(connectSerial, RECONNECT_DELAY_MS);
+      }
       return;
     }
 
@@ -182,26 +184,32 @@ connectSerial();
 
 port.on("close", () => {
   stopAutoFeeder();
-  console.warn(
-    `[Serial Watchdog] Connection to ${SERIAL_PATH} lost! Initiating auto-recovery loop...`,
-  );
-  broadcastPacket({
-    packetType: 0,
-    systemStatus: "HARDWARE_DISCONNECTED",
-    connectedPort: SERIAL_PATH,
-    timestamp: Date.now(),
-  });
-  setTimeout(connectSerial, RECONNECT_DELAY_MS);
+  if (!isShuttingDown) {
+    console.warn(
+      `[Serial Watchdog] Connection to ${SERIAL_PATH} lost! Initiating auto-recovery loop...`,
+    );
+    broadcastPacket({
+      packetType: 0,
+      systemStatus: "HARDWARE_DISCONNECTED",
+      connectedPort: SERIAL_PATH,
+      timestamp: Date.now(),
+    });
+    setTimeout(connectSerial, RECONNECT_DELAY_MS);
+  }
 });
 
 port.on("error", (err) => {
-  console.error(`[Serial Hardware Guard] Trapped error: ${err.message}`);
+  if (!isShuttingDown) {
+    console.error(`[Serial Hardware Guard] Trapped error: ${err.message}`);
+  }
 });
 
 // ============================================================================
 // INCOMING TELEMETRY PROCESSING WITH SMOOTHING
 // ============================================================================
 parser.on("data", (line) => {
+  if (isShuttingDown) return;
+
   const trimmed = line.trim();
   if (!trimmed) return;
 
@@ -327,3 +335,7 @@ function shutdown(signal) {
 
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("uncaughtException", (err) => {
+  console.error("[Fatal Exception Trapped]:", err);
+  shutdown("UNCAUGHT_EXCEPTION");
+});
