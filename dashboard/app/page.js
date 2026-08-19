@@ -14,7 +14,7 @@ export default function HDCDashboard() {
 
   const activeBitCount =
     packet?.hypervector?.filter((bit) => bit === 1).length ?? 0;
-  const isHardwareOnline = isConnected && hardwareStatus !== "HARDWARE_DISCONNECTED";
+  const isHardwareOnline = isConnected || hardwareStatus === "ONLINE";
 
   return (
     <main className="min-h-screen bg-hdc-dark text-slate-100 p-6 md:p-10 font-sans">
@@ -53,7 +53,11 @@ export default function HDCDashboard() {
                     : "text-hdc-red font-bold"
                 }
               >
-                {isHardwareOnline ? (isFrozen ? "FROZEN" : "STREAMING") : "OFFLINE"}
+                {isHardwareOnline
+                  ? isFrozen
+                    ? "FROZEN"
+                    : "STREAMING"
+                  : "OFFLINE"}
               </span>
             </div>
           </div>
