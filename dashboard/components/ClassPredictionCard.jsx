@@ -12,8 +12,9 @@ export function ClassPredictionCard({ packet }) {
         );
     }
 
-    const { className, matchScore, classId } = packet;
-    const isHighConfidence = matchScore >= 75.0;
+    const { className, matchScore, classId = 255 } = packet;
+    const safeMatchScore = Number.isFinite(matchScore) ? matchScore : 0;
+    const isHighConfidence = safeMatchScore >= 75.0;
 
     return (
         <div className="bg-hdc-card border border-hdc-border rounded-xl p-6 shadow-lg flex flex-col justify-between h-56 relative overflow-hidden">
@@ -28,7 +29,7 @@ export function ClassPredictionCard({ packet }) {
                         <Cpu className="w-4 h-4 text-hdc-cyan" /> Class Prediction Engine
                     </span>
                     <span className="bg-hdc-border text-slate-300 px-2 py-0.5 rounded text-[10px]">
-                        ID: 0x{classId.toString(16).padStart(2, '0').toUpperCase()}
+                        ID: 0x{Number(classId).toString(16).padStart(2, '0').toUpperCase()}
                     </span>
                 </div>
 
@@ -41,7 +42,7 @@ export function ClassPredictionCard({ packet }) {
                 <div className="flex justify-between items-center mb-2">
                     <span className="text-xs text-slate-400 font-mono">Similarity Match</span>
                     <span className={`text-sm font-bold font-mono ${isHighConfidence ? 'text-hdc-cyan' : 'text-hdc-amber'}`}>
-                        {matchScore}%
+                        {safeMatchScore}%
                     </span>
                 </div>
 
@@ -49,7 +50,7 @@ export function ClassPredictionCard({ packet }) {
                     <div
                         className={`h-2.5 rounded-full transition-all duration-150 ${isHighConfidence ? 'bg-hdc-cyan' : 'bg-hdc-amber'
                             }`}
-                        style={{ width: `${matchScore}%` }}
+                        style={{ width: `${safeMatchScore}%` }}
                     />
                 </div>
 

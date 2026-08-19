@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 export function useHDCStream(wsUrl = "ws://localhost:8080", isFrozen = false) {
   const [packet, setPacket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [hardwareStatus, setHardwareStatus] = useState("HARDWARE_DISCONNECTED");
   const [fps, setFps] = useState(0);
   const [totalPackets, setTotalPackets] = useState(0);
   const [latency, setLatency] = useState(0);
@@ -30,10 +31,17 @@ export function useHDCStream(wsUrl = "ws://localhost:8080", isFrozen = false) {
       };
 
       ws.onmessage = (event) => {
-        if (isFrozenRef.current) return;
-
         try {
           const data = JSON.parse(event.data);
+
+          if (data.packetType === 0) {
+            setHardwareStatus(data.systemStatus || "HARDWARE_DISCONNECTED");
+            setIsConnected(true);
+            return;
+          }
+
+          if (data.packetType !== 1 || isFrozenRef.current) return;
+
           const now = Date.now();
           frameCount.current += 1;
           setTotalPackets((prev) => prev + 1);
@@ -46,6 +54,7 @@ export function useHDCStream(wsUrl = "ws://localhost:8080", isFrozen = false) {
 
       ws.onclose = () => {
         setIsConnected(false);
+        setHardwareStatus("HARDWARE_DISCONNECTED");
         setTimeout(connect, 2000);
       };
 
@@ -62,5 +71,12 @@ export function useHDCStream(wsUrl = "ws://localhost:8080", isFrozen = false) {
     };
   }, [wsUrl]);
 
-  return { packet, isConnected, fps, totalPackets, latency };
+  return {
+    packet,
+    isConnected: isConnected && hardwareStatus !== "HARDWARE_DISCONNECTED",
+    hardwareStatus,
+    fps,
+    totalPackets,
+    latency,
+  };
 }

@@ -9,13 +9,12 @@ import { TelemetryBar } from "../components/TelemetryBar";
 
 export default function HDCDashboard() {
   const [isFrozen, setIsFrozen] = useState(false);
-  const { packet, isConnected, fps, totalPackets, latency } = useHDCStream(
-    "ws://localhost:8080",
-    isFrozen,
-  );
+  const { packet, isConnected, hardwareStatus, fps, totalPackets, latency } =
+    useHDCStream("ws://localhost:8080", isFrozen);
 
   const activeBitCount =
     packet?.hypervector?.filter((bit) => bit === 1).length ?? 0;
+  const isHardwareOnline = isConnected && hardwareStatus !== "HARDWARE_DISCONNECTED";
 
   return (
     <main className="min-h-screen bg-hdc-dark text-slate-100 p-6 md:p-10 font-sans">
@@ -49,12 +48,12 @@ export default function HDCDashboard() {
               <span className="text-slate-500">SYSTEM STATUS:</span>{" "}
               <span
                 className={
-                  isConnected
+                  isHardwareOnline
                     ? "text-hdc-green font-bold"
                     : "text-hdc-red font-bold"
                 }
               >
-                {isConnected ? (isFrozen ? "FROZEN" : "STREAMING") : "OFFLINE"}
+                {isHardwareOnline ? (isFrozen ? "FROZEN" : "STREAMING") : "OFFLINE"}
               </span>
             </div>
           </div>
