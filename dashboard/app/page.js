@@ -14,7 +14,7 @@ export default function HDCDashboard() {
 
   const activeBitCount =
     packet?.hypervector?.filter((bit) => bit === 1).length ?? 0;
-  const isHardwareOnline = isConnected || hardwareStatus === "ONLINE";
+  const isHardwareOnline = isConnected && hardwareStatus === "ONLINE";
 
   return (
     <main className="min-h-screen bg-hdc-dark text-slate-100 p-6 md:p-10 font-sans">
@@ -77,7 +77,7 @@ export default function HDCDashboard() {
         )}
 
         <TelemetryBar
-          isConnected={isConnected}
+          isConnected={isHardwareOnline}
           fps={fps}
           totalPackets={totalPackets}
           latency={latency}

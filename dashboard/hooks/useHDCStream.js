@@ -11,12 +11,16 @@ export function useHDCStream(wsUrl = "ws://localhost:8080", isFrozen = false) {
   const frameCount = useRef(0);
   const wsRef = useRef(null);
   const isFrozenRef = useRef(isFrozen);
+  const reconnectTimerRef = useRef(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     isFrozenRef.current = isFrozen;
   }, [isFrozen]);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const fpsInterval = setInterval(() => {
       setFps(frameCount.current);
       frameCount.current = 0;
@@ -56,7 +60,9 @@ export function useHDCStream(wsUrl = "ws://localhost:8080", isFrozen = false) {
       ws.onclose = () => {
         setIsConnected(false);
         setHardwareStatus("HARDWARE_DISCONNECTED");
-        setTimeout(connect, 2000);
+        if (isMountedRef.current) {
+          reconnectTimerRef.current = setTimeout(connect, 2000);
+        }
       };
 
       ws.onerror = () => {
@@ -67,7 +73,12 @@ export function useHDCStream(wsUrl = "ws://localhost:8080", isFrozen = false) {
     connect();
 
     return () => {
+      isMountedRef.current = false;
       clearInterval(fpsInterval);
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
       if (wsRef.current) wsRef.current.close();
     };
   }, [wsUrl]);
