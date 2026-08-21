@@ -8,6 +8,7 @@ const BAUD_RATE = 115200;
 const WS_PORT = 8080;
 const RECONNECT_DELAY_MS = 2000;
 const SHUTDOWN_TIMEOUT_MS = 3000;
+const HEX_32_REGEX = /^[0-9a-fA-F]{32}$/;
 
 const GESTURE_CLASSES = {
   0: "Circle Gesture",
@@ -30,6 +31,7 @@ let currentLockedClass = 255; // Default idle class
 let frameCount = 0;
 let lastFpsTimestamp = Date.now();
 let currentHVS = 10; // Default base rate
+let droppedFrameCount = 0;
 
 /**
  * Calculates moving average of array numbers
@@ -214,6 +216,10 @@ parser.on("data", (line) => {
   if (!trimmed) return;
 
   if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) {
+    droppedFrameCount++;
+    console.warn(
+      `[Serial Noise Filtered #${droppedFrameCount}]: Ignored fragment -> "${trimmed}"`,
+    );
     return;
   }
 
@@ -221,9 +227,19 @@ parser.on("data", (line) => {
     const mcuData = JSON.parse(trimmed);
 
     if (mcuData.status === "result") {
-      const hexStr = mcuData.hex || "00000000000000000000000000000000";
-      const rawDistance = mcuData.raw ?? 0;
-      const rawPredictedClass = mcuData.predictedClass ?? 255;
+      const hexStr = typeof mcuData.hex === "string" ? mcuData.hex.trim() : "";
+      if (!HEX_32_REGEX.test(hexStr)) {
+        droppedFrameCount++;
+        console.warn(
+          `[Serial Noise Filtered #${droppedFrameCount}]: Invalid Hex length/format -> "${hexStr}"`,
+        );
+        return;
+      }
+
+      const rawDistance = Number.isFinite(mcuData.raw) ? mcuData.raw : 0;
+      const rawPredictedClass = Number.isFinite(mcuData.predictedClass)
+        ? mcuData.predictedClass
+        : 255;
       const now = Date.now();
 
       // Update throughput metrics every 1000ms
@@ -274,6 +290,7 @@ parser.on("data", (line) => {
         hvsRate: currentHVS,
         fpgaLatencyUs: 124,
         cpuSavedCycles: 128 * 64,
+        droppedFrames: droppedFrameCount,
       };
 
       broadcastPacket(packet);
@@ -281,6 +298,7 @@ parser.on("data", (line) => {
       console.log(`[MCU Message]:`, mcuData);
     }
   } catch (e) {
+    droppedFrameCount++;
     console.error(`[JSON Guard] Bypassed corrupted serial payload:`, e.message);
   }
 });
