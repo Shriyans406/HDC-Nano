@@ -7,6 +7,7 @@ const SERIAL_PATH = process.env.SERIAL_PORT || "COM5";
 const BAUD_RATE = 115200;
 const WS_PORT = 8080;
 const RECONNECT_DELAY_MS = 2000;
+const HEARTBEAT_INTERVAL_MS = 2000;
 const SHUTDOWN_TIMEOUT_MS = 3000;
 const HEX_32_REGEX = /^[0-9a-fA-F]{32}$/;
 
@@ -70,6 +71,7 @@ const wss = new WebSocketServer({ port: WS_PORT });
 console.log(`[HDC Gateway] WebSocket Server live on ws://localhost:${WS_PORT}`);
 
 let activeClients = 0;
+let heartbeatTimer = null;
 
 wss.on("connection", (ws) => {
   activeClients++;
@@ -77,14 +79,7 @@ wss.on("connection", (ws) => {
     `[HDC Gateway] Dashboard connected. Active clients: ${activeClients}`,
   );
 
-  ws.send(
-    JSON.stringify({
-      packetType: 0,
-      systemStatus: port.isOpen ? "ONLINE" : "HARDWARE_DISCONNECTED",
-      connectedPort: SERIAL_PATH,
-      timestamp: Date.now(),
-    }),
-  );
+  ws.send(JSON.stringify(constructHeartbeatPacket()));
 
   ws.on("close", () => {
     activeClients--;
@@ -103,6 +98,18 @@ function broadcastPacket(data) {
   });
 }
 
+function constructHeartbeatPacket() {
+  return {
+    packetType: 0,
+    systemStatus: port.isOpen ? "ONLINE" : "HARDWARE_DISCONNECTED",
+    connectedPort: SERIAL_PATH,
+    activeWebSockets: activeClients,
+    gatewayUptimeSec: Math.floor(process.uptime()),
+    droppedFrames: droppedFrameCount,
+    timestamp: Date.now(),
+  };
+}
+
 console.log(`[HDC Gateway] Opening serial port: ${SERIAL_PATH}`);
 
 const port = new SerialPort({
@@ -116,6 +123,18 @@ const parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
 let isReconnecting = false;
 let autoFeederTimer = null;
 let isShuttingDown = false;
+
+function startHeartbeatEngine() {
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+
+  heartbeatTimer = setInterval(() => {
+    if (!isShuttingDown) {
+      broadcastPacket(constructHeartbeatPacket());
+    }
+  }, HEARTBEAT_INTERVAL_MS);
+}
+
+startHeartbeatEngine();
 
 function startAutoFeeder() {
   if (autoFeederTimer) clearInterval(autoFeederTimer);
