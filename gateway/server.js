@@ -134,6 +134,13 @@ function startHeartbeatEngine() {
   }, HEARTBEAT_INTERVAL_MS);
 }
 
+function stopHeartbeatEngine() {
+  if (heartbeatTimer) {
+    clearInterval(heartbeatTimer);
+    heartbeatTimer = null;
+  }
+}
+
 startHeartbeatEngine();
 
 function startAutoFeeder() {
@@ -338,6 +345,7 @@ function shutdown(signal) {
   }, SHUTDOWN_TIMEOUT_MS);
 
   stopAutoFeeder();
+  stopHeartbeatEngine();
 
   wss.clients.forEach((client) => {
     client.close(1001, "Server shutting down");
